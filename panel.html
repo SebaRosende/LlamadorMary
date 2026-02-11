@@ -23,12 +23,13 @@
     <input type="text" id="nombre" placeholder="Nombre">
     <input type="number" id="numero" placeholder="Cantidad">
     <button onclick="enviar()">AGREGAR</button>
+    <button onclick="salir()" style="background-color: #ff4d4d; margin-top: 20px;">CerrAR SESIÓN</button>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, push, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
    
 const firebaseConfig = {
@@ -68,6 +69,15 @@ onAuthStateChanged(auth, (user) => {
         divPanel.style.display = 'none';
     }
 });
+
+    //Función para cerrar sesión
+window.salir = () => {
+    signOut(auth).then(() => {
+        alert("Sesión cerrada correctamente");
+    }).catch((error) => {
+        console.error("Error al cerrar sesión:", error);
+    });
+};
     window.enviar = () => {
         const nom = document.getElementById('nombre').value;
         const num = document.getElementById('numero').value;
@@ -94,6 +104,7 @@ onAuthStateChanged(auth, (user) => {
 </body>
 </html>
     
+
 
 
 
