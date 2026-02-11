@@ -11,6 +11,7 @@
             --blanco: #ffffff;
             --gris-claro: #f0f4f8;
             --rojo: #ff4d4d;
+            --verde: #28a745;
         }
 
         * {
@@ -27,7 +28,6 @@
             min-height: 100vh;
         }
 
-        /* Contenedor de Tarjetas */
         .container {
             width: 100%;
             max-width: 450px;
@@ -45,8 +45,17 @@
             margin-bottom: 20px;
         }
 
-        h1 { margin-top: 0; letter-spacing: 2px; font-weight: 900; }
-        h2 { font-size: 1.2rem; margin-bottom: 20px; color: #555; }
+        h1 {
+            margin-top: 0;
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #555;
+        }
 
         input {
             width: 100%;
@@ -58,7 +67,9 @@
             outline: none;
         }
 
-        input:focus { border-color: var(--azul-israel); }
+        input:focus {
+            border-color: var(--azul-israel);
+        }
 
         button {
             width: 100%;
@@ -73,20 +84,30 @@
             transition: transform 0.1s;
         }
 
-        button:active { transform: scale(0.98); }
+        button:active {
+            transform: scale(0.98);
+        }
 
         .btn-salir {
             background-color: var(--rojo);
             margin-top: 20px;
         }
 
-        /* Estilo del Monitor de Turnos */
         .monitor-card {
             background: #fff;
             border-radius: 15px;
             padding: 15px;
             text-align: left;
             border: 1px dashed var(--azul-israel);
+            margin-bottom: 20px;
+        }
+
+        /* Estilos para el Historial */
+        .historial-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid #ddd;
         }
 
         .turno-item {
@@ -97,7 +118,9 @@
             border-bottom: 1px solid #eee;
         }
 
-        .turno-item:last-child { border-bottom: none; }
+        .turno-item:last-child {
+            border-bottom: none;
+        }
 
         .btn-quitar {
             width: auto;
@@ -106,8 +129,11 @@
             background: #eee;
             color: #333;
         }
-        
-        .btn-quitar:hover { background: var(--rojo); color: white; }
+
+        .btn-quitar:hover {
+            background: var(--rojo);
+            color: white;
+        }
 
         .badge-online {
             font-size: 0.7rem;
@@ -115,12 +141,43 @@
             margin-bottom: 10px;
             display: block;
         }
+
+        .hora-txt {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        /* Estilos para el Historial */
+        .historial-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            max-height: 400px;
+            /* Altura máxima fija */
+            display: flex;
+            flex-direction: column;
+        }
+
+        #lista-historial {
+            overflow-y: auto;
+            /* Scroll solo dentro de la lista */
+            flex-grow: 1;
+        }
+
+        .contador-badge {
+            background: var(--azul-israel);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            float: right;
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- SECCIÓN LOGIN -->
     <div id="seccion-login" class="container" style="display: flex; align-items: center; height: 100vh;">
         <div class="card">
             <h1>ALLENBY</h1>
@@ -131,7 +188,6 @@
         </div>
     </div>
 
-    <!-- SECCIÓN FORMULARIO -->
     <div id="formulario-llamador" class="container" style="display: none;">
         <div class="card">
             <h1>ALLENBY</h1>
@@ -143,11 +199,18 @@
             <button onclick="salir()" class="btn-salir">Cerrar Sesión</button>
         </div>
 
-        <!-- Monitor de lo que está en la TV ahora -->
         <div class="monitor-card">
-            <h3 style="font-size: 0.9rem; margin-top: 0;">ACTIVOS EN PANTALLA:</h3>
+            <h3 style="font-size: 0.9rem; margin-top: 0; color: var(--azul-israel)">📺 EN PANTALLA AHORA:</h3>
             <div id="lista-admin">
                 <p style="font-size: 0.8rem; color: #999;">No hay turnos visibles...</p>
+            </div>
+        </div>
+
+        <div class="historial-card">
+            <h3 style="font-size: 0.9rem; margin-top: 0; color: #555">
+                📋 REGISTRO DEL DÍA
+            </h3>
+            <div id="lista-historial">
             </div>
         </div>
     </div>
@@ -157,7 +220,6 @@
         import { getDatabase, ref, set, push, remove, onValue, query, orderByChild, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDlAOT8pdN6w28FyHBVYtk0mT25TJJR5Yo",
             authDomain: "llamadorresto.firebaseapp.com",
@@ -172,15 +234,12 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // LOGIN
         window.ejecutarLogin = () => {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
-            signInWithEmailAndPassword(auth, email, pass)
-                .catch(error => alert("Error: " + error.message));
+            signInWithEmailAndPassword(auth, email, pass).catch(error => alert("Error: " + error.message));
         };
 
-        // OBSERVADOR DE SESIÓN
         onAuthStateChanged(auth, (user) => {
             const divLogin = document.getElementById('seccion-login');
             const divPanel = document.getElementById('formulario-llamador');
@@ -188,70 +247,105 @@
                 divLogin.style.display = 'none';
                 divPanel.style.display = 'block';
                 escucharCola();
+                escucharHistorial();
             } else {
                 divLogin.style.display = 'flex';
                 divPanel.style.display = 'none';
             }
         });
 
-        // SALIR
-        window.salir = () => {
-            signOut(auth).then(() => alert("Sesión cerrada"));
-        };
-
-        // ENVIAR TURNO
+        window.salir = () => { signOut(auth); };
         window.enviar = () => {
             const nom = document.getElementById('nombre').value;
             const num = document.getElementById('numero').value;
             if (!nom || !num) return alert("Completa los datos");
 
+            const fechaHoy = new Date().toISOString().split('T')[0];
+            const timestampLocal = Date.now(); // Hora local inmediata
+
+            const dataCola = {
+                nombre: nom,
+                numero: num,
+                creado: serverTimestamp() // Para la TV seguimos usando el del servidor
+            };
+
+            const dataHistorial = {
+                nombre: nom,
+                numero: num,
+                horaMs: timestampLocal // Usamos este para el historial
+            };
+
+            // 1. Enviar a la cola de la TV
             const nuevaRef = push(ref(db, 'llamador/cola'));
             const idGenerado = nuevaRef.key;
+            set(nuevaRef, dataCola);
 
-            set(nuevaRef, { 
-                nombre: nom, 
-                numero: num, 
-                creado: serverTimestamp() 
-            });
+            // 2. Enviar al Historial del día
+            push(ref(db, `historial/${fechaHoy}`), dataHistorial);
 
             document.getElementById('nombre').value = "";
             document.getElementById('numero').value = "";
 
-            // Auto-borrado a los 60 segundos (según tu código actual)
             setTimeout(() => {
                 remove(ref(db, `llamador/cola/${idGenerado}`));
-            }, 30000); 
+            }, 30000);
         };
 
-        // MONITOR PARA EL ADMIN (Ver qué hay en la TV)
         function escucharCola() {
-            const consulta = query(ref(db, 'llamador/cola'), orderByChild('creado'));
-            onValue(consulta, (snapshot) => {
+            onValue(ref(db, 'llamador/cola'), (snapshot) => {
                 const listaAdmin = document.getElementById('lista-admin');
                 listaAdmin.innerHTML = "";
-                let count = 0;
-
+                if (!snapshot.exists()) {
+                    listaAdmin.innerHTML = '<p style="font-size: 0.8rem; color: #999;">No hay turnos visibles...</p>';
+                    return;
+                }
                 snapshot.forEach((child) => {
-                    count++;
                     const item = child.val();
-                    const id = child.key;
                     const div = document.createElement('div');
                     div.className = 'turno-item';
-                    div.innerHTML = `
-                        <span style="font-size:0.9rem"><b>${item.nombre}</b> (${item.numero})</span>
-                        <button class="btn-quitar" onclick="quitar('${id}')">QUITAR YA</button>
-                    `;
+                    div.innerHTML = `<span><b>${item.nombre}</b> (${item.numero})</span>
+                                     <button class="btn-quitar" onclick="quitar('${child.key}')">QUITAR</button>`;
                     listaAdmin.appendChild(div);
                 });
-                if(count === 0) listaAdmin.innerHTML = '<p style="font-size: 0.8rem; color: #999;">No hay turnos visibles...</p>';
             });
         }
 
-        // Función para borrar manualmente desde el monitor
-        window.quitar = (id) => {
-            remove(ref(db, `llamador/cola/${id}`));
-        };
+        function escucharHistorial() {
+    const fechaHoy = new Date().toISOString().split('T')[0];
+    const refHistorial = ref(db, `historial/${fechaHoy}`);
+    
+    onValue(refHistorial, (snapshot) => {
+        const contenedor = document.getElementById('lista-historial');
+        
+        if (!snapshot.exists()) {
+            contenedor.innerHTML = '<p style="font-size: 0.8rem; color: #999;">Aún no hay registros hoy.</p>';
+            return;
+        }
 
+        let html = "";
+        let registros = [];
+        
+        snapshot.forEach(child => {
+            registros.push(child.val());
+        });
+
+        // El más reciente siempre arriba
+        registros.reverse().forEach(item => {
+            const dateObj = item.horaMs ? new Date(item.horaMs) : new Date();
+            const hora = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            html += `
+                <div class="turno-item">
+                    <span style="font-size:0.85rem"><b>${item.nombre}</b> - Cant: ${item.numero}</span>
+                    <span class="hora-txt">${hora}</span>
+                </div>`;
+        });
+        
+        contenedor.innerHTML = html;
+    });
+}
+        window.quitar = (id) => { remove(ref(db, `llamador/cola/${id}`)); };
     </script>
 </body>
+
 </html>
