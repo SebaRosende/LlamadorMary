@@ -28,9 +28,21 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, push, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const auth = getAuth(app);
+   
+const firebaseConfig = {
+            apiKey: "AIzaSyDlAOT8pdN6w28FyHBVYtk0mT25TJJR5Yo",
+            authDomain: "llamadorresto.firebaseapp.com",
+            databaseURL: "https://llamadorresto-default-rtdb.firebaseio.com",
+            projectId: "llamadorresto",
+            storageBucket: "llamadorresto.firebasestorage.app",
+            messagingSenderId: "734356662323",
+            appId: "1:734356662323:web:56ebf19b202bae63c69b46"
+        };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+   const auth = getAuth(app);
 
 window.ejecutarLogin = () => {
     const email = document.getElementById('email').value;
@@ -56,19 +68,6 @@ onAuthStateChanged(auth, (user) => {
         divPanel.style.display = 'none';
     }
 });
-    
-const firebaseConfig = {
-            apiKey: "AIzaSyDlAOT8pdN6w28FyHBVYtk0mT25TJJR5Yo",
-            authDomain: "llamadorresto.firebaseapp.com",
-            databaseURL: "https://llamadorresto-default-rtdb.firebaseio.com",
-            projectId: "llamadorresto",
-            storageBucket: "llamadorresto.firebasestorage.app",
-            messagingSenderId: "734356662323",
-            appId: "1:734356662323:web:56ebf19b202bae63c69b46"
-        };
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
     window.enviar = () => {
         const nom = document.getElementById('nombre').value;
         const num = document.getElementById('numero').value;
@@ -95,5 +94,6 @@ const firebaseConfig = {
 </body>
 </html>
     
+
 
 
