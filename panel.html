@@ -22,7 +22,28 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, push, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+const auth = getAuth(app);
+
+// 1. Función de Login
+window.login = () => {
+    const email = prompt("Email:");
+    const pass = prompt("Password:");
+    signInWithEmailAndPassword(auth, email, pass)
+        .catch(error => alert("Error: " + error.message));
+};
+
+// 2. Observador: Si no está logueado, ocultamos el panel y pedimos login
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log("Bienvenido:", user.email);
+        document.getElementById('formulario-llamador').style.display = 'block';
+    } else {
+        document.getElementById('formulario-llamador').style.display = 'none';
+        login();
+    }
+});
 const firebaseConfig = {
             apiKey: "AIzaSyDlAOT8pdN6w28FyHBVYtk0mT25TJJR5Yo",
             authDomain: "llamadorresto.firebaseapp.com",
@@ -61,3 +82,4 @@ const firebaseConfig = {
 </body>
 </html>
     
+
