@@ -1,38 +1,164 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control</title>
+    <title>Allenby - Panel de Control</title>
     <style>
-        body { font-family: sans-serif; background: #f0f0f0; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        :root {
+            --azul-israel: #0038b8;
+            --blanco: #ffffff;
+            --gris-claro: #f0f4f8;
+            --rojo: #ff4d4d;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--gris-claro);
+            color: var(--azul-israel);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Contenedor de Tarjetas */
+        .container {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--blanco);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 56, 184, 0.1);
+            border: 2px solid var(--azul-israel);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 { margin-top: 0; letter-spacing: 2px; font-weight: 900; }
+        h2 { font-size: 1.2rem; margin-bottom: 20px; color: #555; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--azul-israel); }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--azul-israel);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.1s;
+        }
+
+        button:active { transform: scale(0.98); }
+
+        .btn-salir {
+            background-color: var(--rojo);
+            margin-top: 20px;
+        }
+
+        /* Estilo del Monitor de Turnos */
+        .monitor-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: left;
+            border: 1px dashed var(--azul-israel);
+        }
+
+        .turno-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .turno-item:last-child { border-bottom: none; }
+
+        .btn-quitar {
+            width: auto;
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            background: #eee;
+            color: #333;
+        }
+        
+        .btn-quitar:hover { background: var(--rojo); color: white; }
+
+        .badge-online {
+            font-size: 0.7rem;
+            color: green;
+            margin-bottom: 10px;
+            display: block;
+        }
     </style>
 </head>
+
 <body>
-<div id="seccion-login" style="display: block;">
-    <h2>Acceso Administrativo</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Contraseña">
-    <button onclick="ejecutarLogin()">INGRESAR</button>
-</div>
-<div id="formulario-llamador" style="display: none;">
-    <h2>Nuevo Llamado</h2>
-    <input type="text" id="nombre" placeholder="Nombre">
-    <input type="number" id="numero" placeholder="Cantidad">
-    <button onclick="enviar()">AGREGAR</button>
-    <button onclick="salir()" style="background-color: #ff4d4d; margin-top: 20px;">CerrAR SESIÓN</button>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, push, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    <!-- SECCIÓN LOGIN -->
+    <div id="seccion-login" class="container" style="display: flex; align-items: center; height: 100vh;">
+        <div class="card">
+            <h1>ALLENBY</h1>
+            <h2>Acceso Administrativo</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Contraseña">
+            <button onclick="ejecutarLogin()">INGRESAR</button>
+        </div>
+    </div>
 
-   
-const firebaseConfig = {
+    <!-- SECCIÓN FORMULARIO -->
+    <div id="formulario-llamador" class="container" style="display: none;">
+        <div class="card">
+            <h1>ALLENBY</h1>
+            <span class="badge-online">● Panel Conectado</span>
+            <h2>Nuevo Llamado</h2>
+            <input type="text" id="nombre" placeholder="Nombre del Cliente">
+            <input type="number" id="numero" placeholder="Cantidad">
+            <button onclick="enviar()">LLAMAR A PANTALLA</button>
+            <button onclick="salir()" class="btn-salir">Cerrar Sesión</button>
+        </div>
+
+        <!-- Monitor de lo que está en la TV ahora -->
+        <div class="monitor-card">
+            <h3 style="font-size: 0.9rem; margin-top: 0;">ACTIVOS EN PANTALLA:</h3>
+            <div id="lista-admin">
+                <p style="font-size: 0.8rem; color: #999;">No hay turnos visibles...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, push, remove, onValue, query, orderByChild, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // CONFIGURACIÓN FIREBASE
+        const firebaseConfig = {
             apiKey: "AIzaSyDlAOT8pdN6w28FyHBVYtk0mT25TJJR5Yo",
             authDomain: "llamadorresto.firebaseapp.com",
             databaseURL: "https://llamadorresto-default-rtdb.firebaseio.com",
@@ -41,70 +167,91 @@ const firebaseConfig = {
             messagingSenderId: "734356662323",
             appId: "1:734356662323:web:56ebf19b202bae63c69b46"
         };
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-   const auth = getAuth(app);
 
-window.ejecutarLogin = () => {
-    const email = document.getElementById('email').value;
-    const pass = document.getElementById('password').value;
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
 
-    signInWithEmailAndPassword(auth, email, pass)
-        .then(() => alert("¡Bienvenido!"))
-        .catch(error => alert("Error: " + error.message));
-};
+        // LOGIN
+        window.ejecutarLogin = () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, email, pass)
+                .catch(error => alert("Error: " + error.message));
+        };
 
-// OBSERVADOR: Este es el que hace que aparezca/desaparezca el login
-onAuthStateChanged(auth, (user) => {
-    const divLogin = document.getElementById('seccion-login');
-    const divPanel = document.getElementById('formulario-llamador');
-
-    if (user) {
-        // Si hay usuario: mostramos panel, ocultamos login
-        divLogin.style.display = 'none';
-        divPanel.style.display = 'block';
-    } else {
-        // Si no hay usuario: mostramos login, ocultamos panel
-        divLogin.style.display = 'block';
-        divPanel.style.display = 'none';
-    }
-});
-
-    //Función para cerrar sesión
-window.salir = () => {
-    signOut(auth).then(() => {
-        alert("Sesión cerrada correctamente");
-    }).catch((error) => {
-        console.error("Error al cerrar sesión:", error);
-    });
-};
-    window.enviar = () => {
-        const nom = document.getElementById('nombre').value;
-        const num = document.getElementById('numero').value;
-        if (!nom || !num) return;
-
-        const nuevaRef = push(ref(db, 'llamador/cola'));
-        const idGenerado = nuevaRef.key;
-
-        // Agregamos un timestamp para que la pantalla sepa exactamente el orden
-        set(nuevaRef, { 
-            nombre: nom, 
-            numero: num, 
-            creado: serverTimestamp() 
+        // OBSERVADOR DE SESIÓN
+        onAuthStateChanged(auth, (user) => {
+            const divLogin = document.getElementById('seccion-login');
+            const divPanel = document.getElementById('formulario-llamador');
+            if (user) {
+                divLogin.style.display = 'none';
+                divPanel.style.display = 'block';
+                escucharCola();
+            } else {
+                divLogin.style.display = 'flex';
+                divPanel.style.display = 'none';
+            }
         });
 
-        document.getElementById('nombre').value = "";
-        document.getElementById('numero').value = "";
+        // SALIR
+        window.salir = () => {
+            signOut(auth).then(() => alert("Sesión cerrada"));
+        };
 
-        setTimeout(() => {
-            remove(ref(db, `llamador/cola/${idGenerado}`));
-        }, 60000); 
-    }
-</script>
+        // ENVIAR TURNO
+        window.enviar = () => {
+            const nom = document.getElementById('nombre').value;
+            const num = document.getElementById('numero').value;
+            if (!nom || !num) return alert("Completa los datos");
+
+            const nuevaRef = push(ref(db, 'llamador/cola'));
+            const idGenerado = nuevaRef.key;
+
+            set(nuevaRef, { 
+                nombre: nom, 
+                numero: num, 
+                creado: serverTimestamp() 
+            });
+
+            document.getElementById('nombre').value = "";
+            document.getElementById('numero').value = "";
+
+            // Auto-borrado a los 60 segundos (según tu código actual)
+            setTimeout(() => {
+                remove(ref(db, `llamador/cola/${idGenerado}`));
+            }, 30000); 
+        };
+
+        // MONITOR PARA EL ADMIN (Ver qué hay en la TV)
+        function escucharCola() {
+            const consulta = query(ref(db, 'llamador/cola'), orderByChild('creado'));
+            onValue(consulta, (snapshot) => {
+                const listaAdmin = document.getElementById('lista-admin');
+                listaAdmin.innerHTML = "";
+                let count = 0;
+
+                snapshot.forEach((child) => {
+                    count++;
+                    const item = child.val();
+                    const id = child.key;
+                    const div = document.createElement('div');
+                    div.className = 'turno-item';
+                    div.innerHTML = `
+                        <span style="font-size:0.9rem"><b>${item.nombre}</b> (${item.numero})</span>
+                        <button class="btn-quitar" onclick="quitar('${id}')">QUITAR YA</button>
+                    `;
+                    listaAdmin.appendChild(div);
+                });
+                if(count === 0) listaAdmin.innerHTML = '<p style="font-size: 0.8rem; color: #999;">No hay turnos visibles...</p>';
+            });
+        }
+
+        // Función para borrar manualmente desde el monitor
+        window.quitar = (id) => {
+            remove(ref(db, `llamador/cola/${id}`));
+        };
+
+    </script>
 </body>
 </html>
-    
-
-
-
-
