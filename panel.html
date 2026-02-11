@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f0f0; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h3>Llamador</h3>
+    <input type="text" id="nombre" placeholder="Nombre" autocomplete="off">
+    <input type="number" id="numero" placeholder="Puesto / Turno" autocomplete="off">
+    <button onclick="enviar()">AGREGAR</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, push, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+            apiKey: "AIzaSyDlAOT8pdN6w28FyHBVYtk0mT25TJJR5Yo",
+            authDomain: "llamadorresto.firebaseapp.com",
+            databaseURL: "https://llamadorresto-default-rtdb.firebaseio.com",
+            projectId: "llamadorresto",
+            storageBucket: "llamadorresto.firebasestorage.app",
+            messagingSenderId: "734356662323",
+            appId: "1:734356662323:web:56ebf19b202bae63c69b46"
+        };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.enviar = () => {
+        const nom = document.getElementById('nombre').value;
+        const num = document.getElementById('numero').value;
+        if (!nom || !num) return;
+
+        const nuevaRef = push(ref(db, 'llamador/cola'));
+        const idGenerado = nuevaRef.key;
+
+        // Agregamos un timestamp para que la pantalla sepa exactamente el orden
+        set(nuevaRef, { 
+            nombre: nom, 
+            numero: num, 
+            creado: serverTimestamp() 
+        });
+
+        document.getElementById('nombre').value = "";
+        document.getElementById('numero').value = "";
+
+        setTimeout(() => {
+            remove(ref(db, `llamador/cola/${idGenerado}`));
+        }, 60000); 
+    }
+</script>
+</body>
+</html>
+    

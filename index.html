@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pantalla Llamador - Fija</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            background: #001f3f;
+            color: white;
+            font-family: 'Arial Black', sans-serif;
+            height: 100vh;
+            /* Altura total de la pantalla */
+            width: 100vw;
+            overflow: hidden;
+            /* Prohibido el scroll */
+        }
+
+        /* Contenedor principal: Ocupa el 100% de la TV */
+        #lista-llamados {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            /* Divide la pantalla en 5 filas iguales */
+            height: 100vh;
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .fila {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0 40px;
+            border-radius: 15px;
+            border-left: 20px solid #FF4136;
+            overflow: hidden;
+            /* Evita que el texto rompa la caja */
+            animation: entrar 0.5s ease-out;
+        }
+
+        /* El primer nombre (el más nuevo) resalta más */
+        .fila:first-child {
+            background: rgba(255, 255, 255, 0.2);
+            border-left: 30px solid #0074D9;
+            /* Azul para el nuevo */
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .nombre {
+            font-size: clamp(2rem, 7vh, 4.5rem);
+            /* Se ajusta entre un mínimo y máximo */
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+        }
+
+        .numero {
+            font-size: clamp(2.5rem, 9vh, 6rem);
+            color: #FF4136;
+            font-weight: 900;
+        }
+
+        .fila:first-child .numero {
+            color: #0074D9;
+            /* El número del nuevo también cambia de color */
+        }
+
+        @keyframes entrar {
+            from {
+                opacity: 0;
+                transform: translateX(-100px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Estilo para el título fijo */
+        .titulo-principal {
+            background: #0074D9;
+            /* Un azul distinto para resaltar */
+            color: white;
+            text-align: center;
+            padding: 2vh 0;
+            font-size: 5vh;
+            letter-spacing: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border-bottom: 5px solid #FF4136;
+            z-index: 10;
+        }
+
+        /* Ajuste para que la lista ocupe el resto de la pantalla */
+        #lista-llamados {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            height: calc(100vh - 10vh);
+            /* Restamos la altura del título */
+            gap: 10px;
+            padding: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="titulo-principal">
+        ESPERE SU LLAMADO
+    </header>
+    <div id="lista-llamados">
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // CONFIGURACIÓN (Usa la tuya de Firebase)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlAOT8pdN6w28FyHBVYtk0mT25TJJR5Yo",
+            authDomain: "llamadorresto.firebaseapp.com",
+            databaseURL: "https://llamadorresto-default-rtdb.firebaseio.com",
+            projectId: "llamadorresto",
+            storageBucket: "llamadorresto.firebasestorage.app",
+            messagingSenderId: "734356662323",
+            appId: "1:734356662323:web:56ebf19b202bae63c69b46"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const listaDiv = document.getElementById('lista-llamados');
+
+        // Escuchar cambios ordenados por tiempo
+        const consulta = query(ref(db, 'llamador/cola'), orderByChild('creado'));
+
+        onValue(consulta, (snapshot) => {
+            listaDiv.innerHTML = "";
+            let items = [];
+
+            snapshot.forEach((childSnapshot) => {
+                items.push(childSnapshot.val());
+            });
+
+            // Invertir para que el último sea el primero y tomar máximo 5
+            items.reverse().slice(0, 6).forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'fila';
+                div.innerHTML = `
+                    <div class="nombre">${item.nombre}</div>
+                    <div class="numero">${item.numero}</div>
+                `;
+                listaDiv.appendChild(div);
+            });
+        });
+    </script>
+</body>
+
+</html>
