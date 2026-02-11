@@ -12,10 +12,16 @@
     </style>
 </head>
 <body>
-<div class="card">
-    <h3>Llamador</h3>
-    <input type="text" id="nombre" placeholder="Nombre" autocomplete="off">
-    <input type="number" id="numero" placeholder="Puesto / Turno" autocomplete="off">
+<div id="seccion-login" style="display: block;">
+    <h2>Acceso Administrativo</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Contraseña">
+    <button onclick="ejecutarLogin()">INGRESAR</button>
+</div>
+<div id="formulario-llamador" style="display: none;">
+    <h2>Nuevo Llamado</h2>
+    <input type="text" id="nombre" placeholder="Nombre">
+    <input type="number" id="numero" placeholder="Cantidad">
     <button onclick="enviar()">AGREGAR</button>
 </div>
 
@@ -26,24 +32,31 @@ import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https:/
 
 const auth = getAuth(app);
 
-// 1. Función de Login
-window.login = () => {
-    const email = prompt("Email:");
-    const pass = prompt("Password:");
+window.ejecutarLogin = () => {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+
     signInWithEmailAndPassword(auth, email, pass)
+        .then(() => alert("¡Bienvenido!"))
         .catch(error => alert("Error: " + error.message));
 };
 
-// 2. Observador: Si no está logueado, ocultamos el panel y pedimos login
+// OBSERVADOR: Este es el que hace que aparezca/desaparezca el login
 onAuthStateChanged(auth, (user) => {
+    const divLogin = document.getElementById('seccion-login');
+    const divPanel = document.getElementById('formulario-llamador');
+
     if (user) {
-        console.log("Bienvenido:", user.email);
-        document.getElementById('formulario-llamador').style.display = 'block';
+        // Si hay usuario: mostramos panel, ocultamos login
+        divLogin.style.display = 'none';
+        divPanel.style.display = 'block';
     } else {
-        document.getElementById('formulario-llamador').style.display = 'none';
-        login();
+        // Si no hay usuario: mostramos login, ocultamos panel
+        divLogin.style.display = 'block';
+        divPanel.style.display = 'none';
     }
 });
+    
 const firebaseConfig = {
             apiKey: "AIzaSyDlAOT8pdN6w28FyHBVYtk0mT25TJJR5Yo",
             authDomain: "llamadorresto.firebaseapp.com",
@@ -82,4 +95,5 @@ const firebaseConfig = {
 </body>
 </html>
     
+
 
