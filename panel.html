@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Allenby - Panel de Control</title>
+    <title>Panel de Control</title>
     <style>
         :root {
             --azul-israel: #0038b8;
@@ -173,6 +173,7 @@
             font-size: 0.8rem;
             float: right;
         }
+
     </style>
 </head>
 
@@ -180,39 +181,45 @@
 
     <div id="seccion-login" class="container" style="display: flex; align-items: center; height: 100vh;">
         <div class="card">
-            <h1>ALLENBY</h1>
+            <h1>Turnos</h1>
             <h2>Acceso Administrativo</h2>
             <input type="email" id="email" placeholder="Email">
             <input type="password" id="password" placeholder="Contraseña">
             <button onclick="ejecutarLogin()">INGRESAR</button>
         </div>
     </div>
-
     <div id="formulario-llamador" class="container" style="display: none;">
         <div class="card">
-            <h1>ALLENBY</h1>
+            <h1>HOLA MARI!</h1>
             <span class="badge-online">● Panel Conectado</span>
             <h2>Nuevo Llamado</h2>
-            <input type="text" id="nombre" placeholder="Nombre del Cliente">
-            <input type="number" id="numero" placeholder="Cantidad">
+            <input type="text" id="nombre" placeholder="Nombre del Cliente" maxlength="20">             
+        <input type="number" id="numero" placeholder="Cantidad" oninput="if(this.value.length > 2) this.value = this.value.slice(0, 2);">
+            <select id="sector"
+                style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ccc;">
+                <option value="AllenBy">AllenBy</option>
+                <option value="Mari´s Travel">Mari´s Travel</option>
+            </select>
+
             <button onclick="enviar()">LLAMAR A PANTALLA</button>
             <button onclick="salir()" class="btn-salir">Cerrar Sesión</button>
         </div>
+    </div>
 
-        <div class="monitor-card">
-            <h3 style="font-size: 0.9rem; margin-top: 0; color: var(--azul-israel)">📺 EN PANTALLA AHORA:</h3>
-            <div id="lista-admin">
-                <p style="font-size: 0.8rem; color: #999;">No hay turnos visibles...</p>
-            </div>
+    <div class="monitor-card">
+        <h3 style="font-size: 0.9rem; margin-top: 0; color: var(--azul-israel)">📺 EN PANTALLA AHORA:</h3>
+        <div id="lista-admin">
+            <p style="font-size: 0.8rem; color: #999;">No hay turnos visibles...</p>
         </div>
+    </div>
 
-        <div class="historial-card">
-            <h3 style="font-size: 0.9rem; margin-top: 0; color: #555">
-                📋 REGISTRO DEL DÍA
-            </h3>
-            <div id="lista-historial">
-            </div>
+    <div class="historial-card">
+        <h3 style="font-size: 0.9rem; margin-top: 0; color: #555">
+            📋 REGISTRO DEL DÍA
+        </h3>
+        <div id="lista-historial">
         </div>
+    </div>
     </div>
 
     <script type="module">
@@ -258,6 +265,7 @@
         window.enviar = () => {
             const nom = document.getElementById('nombre').value;
             const num = document.getElementById('numero').value;
+            const sector = document.getElementById('sector').value;
             if (!nom || !num) return alert("Completa los datos");
 
             const fechaHoy = new Date().toISOString().split('T')[0];
@@ -266,12 +274,14 @@
             const dataCola = {
                 nombre: nom,
                 numero: num,
+                sector: sector,
                 creado: serverTimestamp() // Para la TV seguimos usando el del servidor
             };
 
             const dataHistorial = {
                 nombre: nom,
                 numero: num,
+                sector: sector,
                 horaMs: timestampLocal // Usamos este para el historial
             };
 
@@ -311,39 +321,39 @@
         }
 
         function escucharHistorial() {
-    const fechaHoy = new Date().toISOString().split('T')[0];
-    const refHistorial = ref(db, `historial/${fechaHoy}`);
-    
-    onValue(refHistorial, (snapshot) => {
-        const contenedor = document.getElementById('lista-historial');
-        
-        if (!snapshot.exists()) {
-            contenedor.innerHTML = '<p style="font-size: 0.8rem; color: #999;">Aún no hay registros hoy.</p>';
-            return;
-        }
+            const fechaHoy = new Date().toISOString().split('T')[0];
+            const refHistorial = ref(db, `historial/${fechaHoy}`);
 
-        let html = "";
-        let registros = [];
-        
-        snapshot.forEach(child => {
-            registros.push(child.val());
-        });
+            onValue(refHistorial, (snapshot) => {
+                const contenedor = document.getElementById('lista-historial');
 
-        // El más reciente siempre arriba
-        registros.reverse().forEach(item => {
-            const dateObj = item.horaMs ? new Date(item.horaMs) : new Date();
-            const hora = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
-            html += `
+                if (!snapshot.exists()) {
+                    contenedor.innerHTML = '<p style="font-size: 0.8rem; color: #999;">Aún no hay registros hoy.</p>';
+                    return;
+                }
+
+                let html = "";
+                let registros = [];
+
+                snapshot.forEach(child => {
+                    registros.push(child.val());
+                });
+
+                // El más reciente siempre arriba
+                registros.reverse().forEach(item => {
+                    const dateObj = item.horaMs ? new Date(item.horaMs) : new Date();
+                    const hora = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    html += `
                 <div class="turno-item">
                     <span style="font-size:0.85rem"><b>${item.nombre}</b> - Cant: ${item.numero}</span>
                     <span class="hora-txt">${hora}</span>
                 </div>`;
-        });
-        
-        contenedor.innerHTML = html;
-    });
-}
+                });
+
+                contenedor.innerHTML = html;
+            });
+        }
         window.quitar = (id) => { remove(ref(db, `llamador/cola/${id}`)); };
     </script>
 </body>
